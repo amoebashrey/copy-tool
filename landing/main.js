@@ -80,7 +80,7 @@
     }],
     [4700, function () { /* restore the approved token */
       demo.dataset.phase = '4';
-      demoLabel.textContent = 'Get started';
+      demoLabel.textContent = 'Create account';
       demoLabel.classList.add('swap');
     }],
     [5800, function () { /* order is restored */
@@ -89,7 +89,7 @@
     }]
   ], 8400, function () {
     demo.dataset.phase = '0';
-    demoLabel.textContent = 'Get startd';
+    demoLabel.textContent = 'Sign Up';
     demoLabel.classList.remove('swap');
     demoCaption.textContent = '';
   });
@@ -126,7 +126,7 @@
   /* ---------- card इ : edit once, propagate to linked layers ---------- */
   var propMaster = document.getElementById('propMaster');
   var propRows = document.querySelectorAll('#propDemo .prop-rows li');
-  var propTexts = ['Get started', 'Start free trial'];
+  var propTexts = ['Create account', 'Create free account'];
   var propIdx = 0;
   setInterval(function () {
     propIdx = (propIdx + 1) % propTexts.length;

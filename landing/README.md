@@ -1,6 +1,6 @@
 # Chitra — landing page
 
-Marketing landing page for **Chitra**, the Divine Scribe for Product Copy — a Figma plugin that keeps every string in your designs linked, statused, and ready to ship.
+Landing page for **Chitra**, a Figma plugin that reads every text layer in your file, keeps them in one place, and flags the ones that drifted out of sync. A shrey.lab project.
 
 Buildless static site: `index.html` + `styles.css` + `main.js`. No framework, no bundler, no npm dependencies. Google Fonts load via `<link>`; every other asset is inline SVG.
 
@@ -20,5 +20,5 @@ Any static host works. On **Vercel**: create a project from this repo and set th
 
 ## Notes
 
-- Light ("manuscript paper") and dark ("ink-pot indigo") themes: follows `prefers-color-scheme`, with a manual toggle persisted in `localStorage` (`chitra-theme`).
+- Light ("warm paper") and dark ("warm charcoal") themes: follows `prefers-color-scheme`, with a manual toggle persisted in `localStorage` (`chitra-theme`).
 - All animations are pure HTML/CSS/JS and respect `prefers-reduced-motion` — final states ship in the markup; JS only animates when motion is allowed.
