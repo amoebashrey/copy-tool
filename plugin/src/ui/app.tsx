@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'preact/hooks';
 import type { ChitraComponent, MainToUi, Status, StringItem, UiToMain } from '../lib/types';
-import { filterStrings, groupByFrame } from '../lib/strings';
+import { filterStrings, groupByPage } from '../lib/strings';
 import { propagationTargets } from '../lib/components';
 import { Toolbar } from './components/Toolbar';
 import { StringRow } from './components/StringRow';
@@ -37,7 +37,7 @@ export function App() {
   }, []);
 
   const visible = filterStrings(items, { search, status });
-  const groups = groupByFrame(visible);
+  const pages = groupByPage(visible);
 
   return (
     <div class="app">
@@ -57,17 +57,22 @@ export function App() {
         <>
           <Toolbar search={search} onSearch={setSearch} status={status} onStatus={setStatus} />
           <div class="scroll">
-            {groups.map((g) => (
-              <section key={g.frame}>
-                <h3 class="frame-name">{g.frame}</h3>
-                {g.items.map((item) => (
-                  <StringRow
-                    key={item.id}
-                    item={item}
-                    components={components}
-                    expanded={expandedId === item.id}
-                    onToggle={() => setExpandedId(expandedId === item.id ? null : item.id)}
-                  />
+            {pages.map((p) => (
+              <section key={p.page}>
+                <h2 class="page-name">{p.page}</h2>
+                {p.frames.map((g) => (
+                  <section key={g.frame}>
+                    <h3 class="frame-name">{g.frame}</h3>
+                    {g.items.map((item) => (
+                      <StringRow
+                        key={item.id}
+                        item={item}
+                        components={components}
+                        expanded={expandedId === item.id}
+                        onToggle={() => setExpandedId(expandedId === item.id ? null : item.id)}
+                      />
+                    ))}
+                  </section>
                 ))}
               </section>
             ))}

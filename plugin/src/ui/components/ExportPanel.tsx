@@ -1,6 +1,7 @@
 import { useState } from 'preact/hooks';
 import type { ChitraComponent, StringItem } from '../../lib/types';
 import { toExportJson } from '../../lib/export';
+import { send } from '../app';
 
 interface Props {
   items: StringItem[];
@@ -9,8 +10,14 @@ interface Props {
 
 export function ExportPanel({ items, components }: Props) {
   const [copied, setCopied] = useState(false);
+  const [pasted, setPasted] = useState('');
   const rows = toExportJson(items, components);
   const json = JSON.stringify(rows, null, 2);
+
+  const applyImport = () => {
+    send({ type: 'import', text: pasted });
+    setPasted('');
+  };
 
   const copy = () => {
     navigator.clipboard.writeText(json).catch(() => {
@@ -46,6 +53,23 @@ export function ExportPanel({ items, components }: Props) {
         </div>
       ))}
       <pre class="json">{json}</pre>
+
+      <div class="import">
+        <h3 class="frame-name">Import</h3>
+        <p class="sub">
+          Paste rows of <strong>id, text</strong> (comma, tab, or semicolon delimited) to
+          write copy back onto the canvas. Ids match the export above.
+        </p>
+        <textarea
+          rows={4}
+          placeholder={'1:23,Save changes\n1:24,Cancel'}
+          value={pasted}
+          onInput={(e) => setPasted((e.target as HTMLTextAreaElement).value)}
+        />
+        <button class="primary" disabled={pasted.trim() === ''} onClick={applyImport}>
+          Apply
+        </button>
+      </div>
     </div>
   );
 }

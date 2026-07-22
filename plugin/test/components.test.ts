@@ -47,10 +47,11 @@ test('parseRegistry: drops malformed entries, keeps valid ones', () => {
   assert.deepEqual(parseRegistry(raw), [comps[0]]);
 });
 
-const item = (id: string, componentId: string | null): StringItem => ({
+const item = (id: string, componentId: string | null, pageName = 'Page 1'): StringItem => ({
   id,
   characters: 'x',
   frameName: 'Home',
+  pageName,
   status: 'none',
   componentId,
 });
@@ -62,4 +63,14 @@ test('propagationTargets: returns ids of items linked to the component', () => {
 
 test('propagationTargets: no linked items gives []', () => {
   assert.deepEqual(propagationTargets([item('1', null)], 'c9'), []);
+});
+
+test('propagationTargets: includes linked items regardless of which page they live on', () => {
+  const items = [
+    item('1', 'c1', 'App'),
+    item('2', 'c1', 'Onboarding'),
+    item('3', null, 'Onboarding'),
+    item('4', 'c1', 'Archive'),
+  ];
+  assert.deepEqual(propagationTargets(items, 'c1'), ['1', '2', '4']);
 });

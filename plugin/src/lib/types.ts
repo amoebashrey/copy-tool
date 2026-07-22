@@ -9,6 +9,7 @@ export interface StringItem {
   id: string;
   characters: string;
   frameName: string;
+  pageName: string;
   status: Status;
   componentId: string | null;
 }
@@ -41,6 +42,7 @@ export type UiToMain =
   | { type: 'create-component'; nodeId: string; name: string }
   | { type: 'link-component'; nodeId: string; componentId: string }
   | { type: 'edit-component'; componentId: string; text: string }
+  | { type: 'import'; text: string }
   | { type: 'refresh' };
 
 export type MainToUi =

@@ -2,6 +2,7 @@
 import type { ChitraComponent, MainToUi, StringItem, UiToMain } from './lib/types';
 import { toStatus } from './lib/strings';
 import { addComponent, parseRegistry, updateComponentText } from './lib/components';
+import { matchImportRows, parseImport } from './lib/export';
 
 const PD_STATUS = 'chitra.status';
 const PD_COMPONENT = 'chitra.componentId';
@@ -18,11 +19,34 @@ function topFrameName(node: TextNode): string {
   return top.type === 'FRAME' || top.type === 'SECTION' ? top.name : 'Page';
 }
 
+function pageName(node: BaseNode): string {
+  let p: BaseNode | null = node.parent;
+  while (p && p.type !== 'PAGE') p = p.parent;
+  return p ? p.name : '';
+}
+
+function allPages(): PageNode[] {
+  return figma.root.children.filter((c): c is PageNode => c.type === 'PAGE');
+}
+
+/**
+ * Every TEXT node in the document, across all pages — the "one source of
+ * truth" index. TODO: very large files will want the async `dynamic-page`
+ * documentAccess + incremental per-page scanning; that's a dedicated,
+ * in-Figma-tested pass, not attempted here.
+ */
+function allTextNodes(): TextNode[] {
+  const nodes: TextNode[] = [];
+  for (const page of allPages()) {
+    nodes.push(...page.findAllWithCriteria({ types: ['TEXT'] }));
+  }
+  return nodes;
+}
+
 function collectTextNodes(): TextNode[] {
   const selection = figma.currentPage.selection;
-  if (selection.length === 0) {
-    return figma.currentPage.findAllWithCriteria({ types: ['TEXT'] });
-  }
+  // No selection → index the whole document, not just the current page.
+  if (selection.length === 0) return allTextNodes();
   const byId = new Map<string, TextNode>();
   for (const node of selection) {
     if (node.type === 'TEXT') byId.set(node.id, node);
@@ -38,6 +62,7 @@ function toItem(node: TextNode): StringItem {
     id: node.id,
     characters: node.characters,
     frameName: topFrameName(node),
+    pageName: pageName(node),
     status: toStatus(node.getPluginData(PD_STATUS)),
     componentId: node.getPluginData(PD_COMPONENT) || null,
   };
@@ -121,10 +146,24 @@ figma.ui.onmessage = async (msg: UiToMain) => {
     }
     case 'edit-component': {
       setRegistry(updateComponentText(getRegistry(), msg.componentId, msg.text));
-      const linked = figma.currentPage
-        .findAllWithCriteria({ types: ['TEXT'] })
-        .filter((n) => n.getPluginData(PD_COMPONENT) === msg.componentId);
+      // Propagate document-wide: linked layers on OTHER pages must update too
+      // ("say it once, same everywhere"), not just figma.currentPage.
+      const linked = allTextNodes().filter(
+        (n) => n.getPluginData(PD_COMPONENT) === msg.componentId,
+      );
       for (const node of linked) await setCharacters(node, msg.text);
+      break;
+    }
+    case 'import': {
+      const rows = parseImport(msg.text);
+      const nodes = new Map(allTextNodes().map((n) => [n.id, n] as const));
+      const { matched, missingIds } = matchImportRows(rows, nodes.keys());
+      for (const row of matched) {
+        const node = nodes.get(row.id);
+        if (node) await setCharacters(node, row.text);
+      }
+      const skipped = missingIds.length > 0 ? `, ${missingIds.length} not found` : '';
+      figma.notify(`Imported ${matched.length} string${matched.length === 1 ? '' : 's'}${skipped}.`);
       break;
     }
     case 'refresh':
@@ -133,6 +172,19 @@ figma.ui.onmessage = async (msg: UiToMain) => {
   postAll();
 };
 
-figma.on('selectionchange', postAll);
-figma.on('currentpagechange', postAll);
+// Debounce document re-scans so rapid selection changes don't thrash the
+// scan/post cycle. (TODO: list virtualization in the UI is the other half of
+// staying snappy on huge files — next dedicated, in-Figma-tested pass.)
+const SCAN_DEBOUNCE_MS = 150;
+let scanTimer: ReturnType<typeof setTimeout> | undefined;
+function schedulePostAll(): void {
+  if (scanTimer !== undefined) clearTimeout(scanTimer);
+  scanTimer = setTimeout(() => {
+    scanTimer = undefined;
+    postAll();
+  }, SCAN_DEBOUNCE_MS);
+}
+
+figma.on('selectionchange', schedulePostAll);
+figma.on('currentpagechange', schedulePostAll);
 postAll();

@@ -48,3 +48,25 @@ export function parseImport(text: string): ImportRow[] {
   }
   return rows;
 }
+
+export interface ImportMatch {
+  matched: ImportRow[];
+  missingIds: string[];
+}
+
+/**
+ * Split parsed import rows into those whose id exists in the document
+ * (the same `node.id` key the export uses) and those that don't.
+ * Row order is preserved; a duplicated id stays duplicated so the last
+ * row wins when rows are applied in order.
+ */
+export function matchImportRows(rows: ImportRow[], existingIds: Iterable<string>): ImportMatch {
+  const ids = new Set(existingIds);
+  const matched: ImportRow[] = [];
+  const missingIds: string[] = [];
+  for (const row of rows) {
+    if (ids.has(row.id)) matched.push(row);
+    else missingIds.push(row.id);
+  }
+  return { matched, missingIds };
+}

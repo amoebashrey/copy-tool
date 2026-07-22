@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { toExportJson, parseImport } from '../src/lib/export';
+import { toExportJson, parseImport, matchImportRows } from '../src/lib/export';
 import type { ChitraComponent, StringItem } from '../src/lib/types';
 
 const comps: ChitraComponent[] = [{ id: 'c1', name: 'CTA', text: 'Save changes' }];
@@ -9,6 +9,7 @@ const item = (over: Partial<StringItem>): StringItem => ({
   id: '1',
   characters: 'Hello',
   frameName: 'Home',
+  pageName: 'Page 1',
   status: 'none',
   componentId: null,
   ...over,
@@ -78,4 +79,34 @@ test('parseImport: skips blank lines and lines without a delimiter', () => {
 test('parseImport: empty input gives []', () => {
   assert.deepEqual(parseImport(''), []);
   assert.deepEqual(parseImport('   \n  '), []);
+});
+
+test('matchImportRows: splits rows into matched and missing by node id', () => {
+  const rows = parseImport('1:2,Hello\n9:9,Ghost\n1:3,World');
+  const { matched, missingIds } = matchImportRows(rows, ['1:2', '1:3', '1:4']);
+  assert.deepEqual(matched, [
+    { id: '1:2', text: 'Hello' },
+    { id: '1:3', text: 'World' },
+  ]);
+  assert.deepEqual(missingIds, ['9:9']);
+});
+
+test('matchImportRows: keeps duplicated ids in order so the last row wins on apply', () => {
+  const rows = [
+    { id: '1:2', text: 'first' },
+    { id: '1:2', text: 'second' },
+  ];
+  const { matched, missingIds } = matchImportRows(rows, ['1:2']);
+  assert.deepEqual(matched.map((r) => r.text), ['first', 'second']);
+  assert.deepEqual(missingIds, []);
+});
+
+test('matchImportRows: no known ids means everything is missing', () => {
+  const { matched, missingIds } = matchImportRows([{ id: 'a', text: 'x' }], []);
+  assert.deepEqual(matched, []);
+  assert.deepEqual(missingIds, ['a']);
+});
+
+test('matchImportRows: empty rows give empty result', () => {
+  assert.deepEqual(matchImportRows([], ['1:2']), { matched: [], missingIds: [] });
 });
