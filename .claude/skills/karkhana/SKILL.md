@@ -15,6 +15,7 @@ Files in this skill:
 | `references/aesthetics.md` | Picking a direction, writing a DESIGN.md, applying house style |
 | `references/components.md` | Sourcing components, setting the stack, picking icons/tools |
 | `references/voice.md` | Writing any user-facing copy |
+| `references/design-review.md` | Running the review loop on a built page (step 5) |
 | `brand/chitra.md` | Working on Chitra, or as the worked example of a DESIGN.md |
 
 ## The method — a repeatable loop
