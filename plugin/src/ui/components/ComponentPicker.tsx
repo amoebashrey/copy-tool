@@ -1,11 +1,11 @@
 import { useState } from 'preact/hooks';
-import type { IdemComponent, StringItem } from '../../lib/types';
+import type { ChitraComponent, StringItem } from '../../lib/types';
 import { send } from '../app';
 
 interface Props {
   item: StringItem;
-  components: IdemComponent[];
-  linked: IdemComponent | undefined;
+  components: ChitraComponent[];
+  linked: ChitraComponent | undefined;
 }
 
 export function ComponentPicker({ item, components, linked }: Props) {

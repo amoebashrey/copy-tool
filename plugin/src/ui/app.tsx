@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
-import type { IdemComponent, MainToUi, Status, StringItem, UiToMain } from '../lib/types';
+import type { ChitraComponent, MainToUi, Status, StringItem, UiToMain } from '../lib/types';
 import { filterStrings, groupByFrame } from '../lib/strings';
 import { propagationTargets } from '../lib/components';
 import { Toolbar } from './components/Toolbar';
@@ -21,7 +21,7 @@ const TABS: { id: Tab; label: string }[] = [
 export function App() {
   const [tab, setTab] = useState<Tab>('strings');
   const [items, setItems] = useState<StringItem[]>([]);
-  const [components, setComponents] = useState<IdemComponent[]>([]);
+  const [components, setComponents] = useState<ChitraComponent[]>([]);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<Status | 'all'>('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -100,7 +100,7 @@ function ComponentRow({
   component,
   linkedCount,
 }: {
-  component: IdemComponent;
+  component: ChitraComponent;
   linkedCount: number;
 }) {
   const [draft, setDraft] = useState(component.text);

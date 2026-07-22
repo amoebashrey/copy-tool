@@ -1,22 +1,22 @@
-import type { IdemComponent, StringItem } from './types';
+import type { ChitraComponent, StringItem } from './types';
 
 export function addComponent(
-  components: IdemComponent[],
-  component: IdemComponent,
-): IdemComponent[] {
+  components: ChitraComponent[],
+  component: ChitraComponent,
+): ChitraComponent[] {
   return [...components, component];
 }
 
 export function updateComponentText(
-  components: IdemComponent[],
+  components: ChitraComponent[],
   componentId: string,
   text: string,
-): IdemComponent[] {
+): ChitraComponent[] {
   return components.map((c) => (c.id === componentId ? { ...c, text } : c));
 }
 
-/** Tolerant parse of the `idem.components` registry JSON stored in pluginData. */
-export function parseRegistry(raw: string): IdemComponent[] {
+/** Tolerant parse of the `chitra.components` registry JSON stored in pluginData. */
+export function parseRegistry(raw: string): ChitraComponent[] {
   if (!raw) return [];
   let parsed: unknown;
   try {
@@ -26,12 +26,12 @@ export function parseRegistry(raw: string): IdemComponent[] {
   }
   if (!Array.isArray(parsed)) return [];
   return parsed.filter(
-    (c): c is IdemComponent =>
+    (c): c is ChitraComponent =>
       typeof c === 'object' &&
       c !== null &&
-      typeof (c as IdemComponent).id === 'string' &&
-      typeof (c as IdemComponent).name === 'string' &&
-      typeof (c as IdemComponent).text === 'string',
+      typeof (c as ChitraComponent).id === 'string' &&
+      typeof (c as ChitraComponent).name === 'string' &&
+      typeof (c as ChitraComponent).text === 'string',
   );
 }
 

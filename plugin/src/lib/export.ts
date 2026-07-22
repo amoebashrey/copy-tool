@@ -1,7 +1,7 @@
-import type { IdemComponent, ExportRow, ImportRow, StringItem } from './types';
+import type { ChitraComponent, ExportRow, ImportRow, StringItem } from './types';
 
 /** Shape strings + registry into the developer handoff array. */
-export function toExportJson(items: StringItem[], components: IdemComponent[]): ExportRow[] {
+export function toExportJson(items: StringItem[], components: ChitraComponent[]): ExportRow[] {
   const names = new Map(components.map((c) => [c.id, c.name]));
   return items.map((i) => ({
     id: i.id,

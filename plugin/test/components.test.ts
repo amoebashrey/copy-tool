@@ -6,9 +6,9 @@ import {
   parseRegistry,
   propagationTargets,
 } from '../src/lib/components';
-import type { IdemComponent, StringItem } from '../src/lib/types';
+import type { ChitraComponent, StringItem } from '../src/lib/types';
 
-const comps: IdemComponent[] = [
+const comps: ChitraComponent[] = [
   { id: 'c1', name: 'CTA', text: 'Save changes' },
   { id: 'c2', name: 'Cancel', text: 'Cancel' },
 ];

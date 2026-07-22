@@ -1,6 +1,6 @@
 {
-  "name": "Idem",
-  "id": "idem-copy-manager",
+  "name": "Chitra",
+  "id": "chitra-copy-manager",
   "api": "1.0.0",
   "main": "dist/code.js",
   "ui": "dist/ui.html",

@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'preact/hooks';
-import type { IdemComponent, StringItem } from '../../lib/types';
+import type { ChitraComponent, StringItem } from '../../lib/types';
 import { send } from '../app';
 import { StatusBadge } from './StatusBadge';
 import { ComponentPicker } from './ComponentPicker';
 
 interface Props {
   item: StringItem;
-  components: IdemComponent[];
+  components: ChitraComponent[];
   expanded: boolean;
   onToggle(): void;
 }

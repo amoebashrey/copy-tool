@@ -1,6 +1,6 @@
-# Idem — the Figma plugin
+# Chitra — the Figma plugin
 
-One source of truth for your product's words, right inside Figma. Idem surfaces
+One source of truth for your product's words, right inside Figma. Chitra surfaces
 every string in a file, lets you edit copy live, track it through a review
 workflow, reuse approved copy as components, and hand it off clean to
 developers.
@@ -35,7 +35,7 @@ npm run watch       # rebuild on change
 2. Open the **Figma desktop app**.
 3. Menu → **Plugins → Development → Import plugin from manifest…**
 4. Select this folder's `manifest.json`.
-5. Run it: **Plugins → Development → Idem**.
+5. Run it: **Plugins → Development → Chitra**.
 
 ## How it's built
 

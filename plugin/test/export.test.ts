@@ -1,9 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { toExportJson, parseImport } from '../src/lib/export';
-import type { IdemComponent, StringItem } from '../src/lib/types';
+import type { ChitraComponent, StringItem } from '../src/lib/types';
 
-const comps: IdemComponent[] = [{ id: 'c1', name: 'CTA', text: 'Save changes' }];
+const comps: ChitraComponent[] = [{ id: 'c1', name: 'CTA', text: 'Save changes' }];
 
 const item = (over: Partial<StringItem>): StringItem => ({
   id: '1',

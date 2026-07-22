@@ -1,10 +1,10 @@
 import { useState } from 'preact/hooks';
-import type { IdemComponent, StringItem } from '../../lib/types';
+import type { ChitraComponent, StringItem } from '../../lib/types';
 import { toExportJson } from '../../lib/export';
 
 interface Props {
   items: StringItem[];
-  components: IdemComponent[];
+  components: ChitraComponent[];
 }
 
 export function ExportPanel({ items, components }: Props) {

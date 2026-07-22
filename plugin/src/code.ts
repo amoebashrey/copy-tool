@@ -1,12 +1,12 @@
 // Main thread: thin adapter between Figma nodes and the pure helpers in lib/.
-import type { IdemComponent, MainToUi, StringItem, UiToMain } from './lib/types';
+import type { ChitraComponent, MainToUi, StringItem, UiToMain } from './lib/types';
 import { toStatus } from './lib/strings';
 import { addComponent, parseRegistry, updateComponentText } from './lib/components';
 
-const PD_STATUS = 'idem.status';
-const PD_COMPONENT = 'idem.componentId';
-const PD_REGISTRY = 'idem.components';
-const PD_COUNTER = 'idem.counter';
+const PD_STATUS = 'chitra.status';
+const PD_COMPONENT = 'chitra.componentId';
+const PD_REGISTRY = 'chitra.components';
+const PD_COUNTER = 'chitra.counter';
 
 figma.showUI(__html__, { width: 380, height: 620, themeColors: true });
 
@@ -45,11 +45,11 @@ function toItem(node: TextNode): StringItem {
 
 // ---- component registry (stored once, as JSON, on figma.root) ----------
 
-function getRegistry(): IdemComponent[] {
+function getRegistry(): ChitraComponent[] {
   return parseRegistry(figma.root.getPluginData(PD_REGISTRY));
 }
 
-function setRegistry(components: IdemComponent[]): void {
+function setRegistry(components: ChitraComponent[]): void {
   figma.root.setPluginData(PD_REGISTRY, JSON.stringify(components));
 }
 

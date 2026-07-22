@@ -14,7 +14,7 @@ export interface StringItem {
 }
 
 /** A reusable copy component (registry lives in figma.root pluginData). */
-export interface IdemComponent {
+export interface ChitraComponent {
   id: string;
   name: string;
   text: string;
@@ -45,4 +45,4 @@ export type UiToMain =
 
 export type MainToUi =
   | { type: 'strings'; items: StringItem[] }
-  | { type: 'components'; components: IdemComponent[] };
+  | { type: 'components'; components: ChitraComponent[] };
