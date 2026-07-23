@@ -33,9 +33,35 @@ export function filterStrings(items: StringItem[], filter: StringFilter): String
   );
 }
 
-// TODO: auto-suggest keys (slugified frame + text, e.g. "checkout.pay_now")
-// for loose strings — a separate pass; validation below is the contract.
 const KEY_PATTERN = /^[a-z0-9._-]+$/;
+
+/** Suggested keys stay short enough to read in a handoff table. */
+const KEY_MAX_LENGTH = 40;
+
+/**
+ * Auto-suggest a handoff key from a string's text: slugify to the key
+ * alphabet (`^[a-z0-9._-]+$`), collapse separator runs, trim, cap length,
+ * and ensure uniqueness against `existingKeys` by appending `-2`, `-3`, ….
+ */
+export function suggestKey(text: string, existingKeys: Iterable<string>): string {
+  let slug = text
+    .toLowerCase()
+    .replace(/['’‘"“”]/g, '') // "don't" → "dont", not "don-t"
+    .replace(/[^a-z0-9._-]+/g, '-') // whitespace and punctuation → '-'
+    .replace(/([._-])[._-]+/g, '$1') // collapse separator runs, keeping the first
+    .replace(/^[._-]+|[._-]+$/g, ''); // no leading/trailing separators
+  if (slug.length > KEY_MAX_LENGTH) {
+    slug = slug.slice(0, KEY_MAX_LENGTH).replace(/[._-]+$/, '');
+  }
+  if (slug === '') slug = 'untitled';
+
+  const taken = new Set(existingKeys);
+  if (!taken.has(slug)) return slug;
+  for (let n = 2; ; n++) {
+    const candidate = `${slug}-${n}`;
+    if (!taken.has(candidate)) return candidate;
+  }
+}
 
 /**
  * Validate a key edit for the item `selfId` against the whole document.

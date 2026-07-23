@@ -9,6 +9,8 @@ const PD_COMPONENT = 'chitra.componentId';
 const PD_KEY = 'chitra.key';
 const PD_REGISTRY = 'chitra.components';
 const PD_COUNTER = 'chitra.counter';
+const PD_ONBOARDED = 'chitra.onboarded';
+const PD_FIRST_WIN = 'chitra.firstWin';
 
 figma.showUI(__html__, { width: 380, height: 620, themeColors: true });
 
@@ -44,10 +46,23 @@ function allTextNodes(): TextNode[] {
   return nodes;
 }
 
+/**
+ * When true, index the whole document even while something is selected —
+ * the user clicked "Show whole file" in the scope banner. Reset on the next
+ * selection change, so scoping stays predictable.
+ */
+let forceWholeFile = false;
+
+/** True when the index is (and will be) scoped to the current selection. */
+function isScoped(): boolean {
+  return !forceWholeFile && figma.currentPage.selection.length > 0;
+}
+
 function collectTextNodes(): TextNode[] {
   const selection = figma.currentPage.selection;
-  // No selection → index the whole document, not just the current page.
-  if (selection.length === 0) return allTextNodes();
+  // No selection (or an explicit "show whole file") → index the whole
+  // document, not just the current page.
+  if (!isScoped()) return allTextNodes();
   const byId = new Map<string, TextNode>();
   for (const node of selection) {
     if (node.type === 'TEXT') byId.set(node.id, node);
@@ -108,8 +123,23 @@ function post(msg: MainToUi): void {
 }
 
 function postAll(): void {
-  post({ type: 'strings', items: collectTextNodes().map(toItem) });
+  post({
+    type: 'strings',
+    items: collectTextNodes().map(toItem),
+    onboarded: figma.root.getPluginData(PD_ONBOARDED) === '1',
+    scoped: isScoped(),
+  });
   post({ type: 'components', components: getRegistry() });
+}
+
+/**
+ * True exactly once per file: the first meaningful win (first key set or
+ * first Link-all) gets the celebratory toast, then the flag stays set.
+ */
+function isFirstWin(): boolean {
+  if (figma.root.getPluginData(PD_FIRST_WIN) === '1') return false;
+  figma.root.setPluginData(PD_FIRST_WIN, '1');
+  return true;
 }
 
 function textNode(id: string): TextNode | null {
@@ -130,7 +160,17 @@ figma.ui.onmessage = async (msg: UiToMain) => {
     }
     case 'set-key': {
       // The UI validates uniqueness/format; an empty key clears the pluginData.
-      textNode(msg.id)?.setPluginData(PD_KEY, msg.key.trim());
+      const node = textNode(msg.id);
+      const key = msg.key.trim();
+      node?.setPluginData(PD_KEY, key);
+      if (node && key !== '' && isFirstWin()) {
+        figma.notify('Key set.');
+        post({
+          type: 'toast',
+          text: 'Order is restored — that copy now has a home.',
+          tone: 'success',
+        });
+      }
       break;
     }
     case 'create-component': {
@@ -149,6 +189,30 @@ figma.ui.onmessage = async (msg: UiToMain) => {
         node.setPluginData(PD_COMPONENT, component.id);
         await setCharacters(node, component.text); // linking adopts the component's copy
       }
+      break;
+    }
+    case 'link-all-duplicates': {
+      // One component, every duplicate linked to it — the "edit once,
+      // changes everywhere" moment. Reuses the create/link paths above.
+      const nodes = msg.nodeIds
+        .map(textNode)
+        .filter((n): n is TextNode => n !== null);
+      if (nodes.length < 2) break;
+      const component = { id: nextComponentId(), name: msg.name, text: nodes[0].characters };
+      setRegistry(addComponent(getRegistry(), component));
+      for (const node of nodes) {
+        node.setPluginData(PD_COMPONENT, component.id);
+        await setCharacters(node, component.text); // linking adopts the component's copy
+      }
+      const summary = `Linked ${nodes.length} layers to “${component.name}”.`;
+      figma.notify(summary);
+      post({
+        type: 'toast',
+        text: isFirstWin()
+          ? `Order is restored — ${nodes.length} strings, one source of truth.`
+          : `${summary} Edit the component once; every layer follows.`,
+        tone: 'success',
+      });
       break;
     }
     case 'edit-component': {
@@ -177,6 +241,14 @@ figma.ui.onmessage = async (msg: UiToMain) => {
       figma.notify(`Imported ${matched.length} string${matched.length === 1 ? '' : 's'}${skipped}.`);
       break;
     }
+    case 'set-onboarded': {
+      figma.root.setPluginData(PD_ONBOARDED, '1');
+      break;
+    }
+    case 'set-scope': {
+      forceWholeFile = msg.whole;
+      break;
+    }
     case 'refresh':
       break;
   }
@@ -196,6 +268,9 @@ function schedulePostAll(): void {
   }, SCAN_DEBOUNCE_MS);
 }
 
-figma.on('selectionchange', schedulePostAll);
+figma.on('selectionchange', () => {
+  forceWholeFile = false; // "show whole file" holds only until selection changes
+  schedulePostAll();
+});
 figma.on('currentpagechange', schedulePostAll);
 postAll();

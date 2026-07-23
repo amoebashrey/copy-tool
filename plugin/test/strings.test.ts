@@ -5,6 +5,7 @@ import {
   groupByFrame,
   groupByPage,
   looseStrings,
+  suggestKey,
   toStatus,
   validateKey,
 } from '../src/lib/strings';
@@ -197,4 +198,72 @@ test('validateKey: keeping your own key is not a duplicate', () => {
 
 test('validateKey: no items means any well-formed key passes', () => {
   assert.equal(validateKey('anything.goes', [], '1:1'), null);
+});
+
+// ---- suggestKey ----------------------------------------------------------
+
+const KEY_PATTERN = /^[a-z0-9._-]+$/;
+
+test('suggestKey: lowercases and turns spaces into separators', () => {
+  assert.equal(suggestKey('Pay now', []), 'pay-now');
+  assert.equal(suggestKey('Save Changes', []), 'save-changes');
+});
+
+test('suggestKey: output always matches the key contract', () => {
+  const inputs = [
+    'Pay now!',
+    '  Weird -- spacing  ',
+    'emoji 🙂 inside',
+    'Comma, semicolon; slash/backslash\\',
+    'CAPS AND 123',
+    'já façade übermäßig',
+  ];
+  for (const text of inputs) {
+    const key = suggestKey(text, []);
+    assert.match(key, KEY_PATTERN, `"${text}" → "${key}"`);
+    assert.equal(validateKey(key, [], 'self'), null, `"${key}" should validate`);
+  }
+});
+
+test('suggestKey: drops apostrophes and quotes instead of splitting on them', () => {
+  assert.equal(suggestKey("Don't stop", []), 'dont-stop');
+  assert.equal(suggestKey('“Quoted” text', []), 'quoted-text');
+});
+
+test('suggestKey: collapses runs of punctuation into one separator', () => {
+  assert.equal(suggestKey('Save… changes — now', []), 'save-changes-now');
+  assert.equal(suggestKey('a   b', []), 'a-b');
+});
+
+test('suggestKey: keeps dots, underscores, and hyphens already in the text', () => {
+  assert.equal(suggestKey('v2.0 release', []), 'v2.0-release');
+  assert.equal(suggestKey('snake_case label', []), 'snake_case-label');
+});
+
+test('suggestKey: trims leading/trailing separators', () => {
+  assert.equal(suggestKey('...Loading...', []), 'loading');
+  assert.equal(suggestKey('  spaced  ', []), 'spaced');
+});
+
+test('suggestKey: caps length at roughly 40 chars without a dangling separator', () => {
+  const long = 'This is a very long sentence that should absolutely get truncated somewhere';
+  const key = suggestKey(long, []);
+  assert.ok(key.length <= 40, `expected ≤40 chars, got ${key.length}`);
+  assert.match(key, /[a-z0-9]$/, 'must not end on a separator');
+  assert.match(key, KEY_PATTERN);
+});
+
+test('suggestKey: falls back to "untitled" when nothing slug-able survives', () => {
+  assert.equal(suggestKey('🙂🙂🙂', []), 'untitled');
+  assert.equal(suggestKey('', []), 'untitled');
+});
+
+test('suggestKey: appends -2, -3… until unique against existing keys', () => {
+  assert.equal(suggestKey('Continue', ['continue']), 'continue-2');
+  assert.equal(suggestKey('Continue', ['continue', 'continue-2']), 'continue-3');
+});
+
+test('suggestKey: unique input is returned untouched', () => {
+  assert.equal(suggestKey('Continue', ['cancel', 'save']), 'continue');
+  assert.equal(suggestKey('Continue', []), 'continue');
 });

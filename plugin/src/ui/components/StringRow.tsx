@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'preact/hooks';
 import type { ChitraComponent, StringItem } from '../../lib/types';
-import { validateKey } from '../../lib/strings';
+import { isLoose, suggestKey, validateKey } from '../../lib/strings';
 import { send } from '../app';
 import { StatusBadge } from './StatusBadge';
 import { ComponentPicker } from './ComponentPicker';
@@ -23,6 +23,13 @@ export function StringRow({ item, allItems, components, expanded, onToggle }: Pr
     ? components.find((c) => c.id === item.componentId)
     : undefined;
   const keyError = validateKey(keyDraft, allItems, item.id);
+  const loose = isLoose(item);
+  const suggestion = loose
+    ? suggestKey(
+        item.characters,
+        allItems.map((i) => i.key).filter((k): k is string => k !== null),
+      )
+    : null;
 
   return (
     <div class={expanded ? 'row expanded' : 'row'}>
@@ -59,10 +66,15 @@ export function StringRow({ item, allItems, components, expanded, onToggle }: Pr
               <input
                 class="key-input"
                 type="text"
-                placeholder="checkout.cta_primary"
+                placeholder={suggestion ?? 'checkout.cta_primary'}
                 value={keyDraft}
                 onInput={(e) => setKeyDraft((e.target as HTMLInputElement).value)}
               />
+              {suggestion !== null && keyDraft.trim() !== suggestion && (
+                <button title={`Use “${suggestion}”`} onClick={() => setKeyDraft(suggestion)}>
+                  Suggest
+                </button>
+              )}
               <button
                 disabled={keyError !== null || keyDraft.trim() === (item.key ?? '')}
                 onClick={() => send({ type: 'set-key', id: item.id, key: keyDraft.trim() })}
@@ -72,6 +84,8 @@ export function StringRow({ item, allItems, components, expanded, onToggle }: Pr
             </div>
             {keyError ? (
               <p class="key-error">{keyError}</p>
+            ) : loose ? (
+              <p class="sub">Untracked copy — a key gives developers a name to call it by.</p>
             ) : (
               <p class="sub">Stable handoff key, e.g. checkout.cta_primary</p>
             )}

@@ -39,6 +39,16 @@ export interface ImportRow {
   text: string;
 }
 
+/**
+ * Two or more strings with identical trimmed text that are not already all
+ * linked to the same component — the raw material for one-click "Link all".
+ */
+export interface DuplicateGroup {
+  /** The shared, trimmed text. */
+  text: string;
+  items: StringItem[];
+}
+
 export type UiToMain =
   | { type: 'edit-text'; id: string; text: string }
   | { type: 'set-status'; id: string; status: Status }
@@ -46,9 +56,20 @@ export type UiToMain =
   | { type: 'create-component'; nodeId: string; name: string }
   | { type: 'link-component'; nodeId: string; componentId: string }
   | { type: 'edit-component'; componentId: string; text: string }
+  | { type: 'link-all-duplicates'; nodeIds: string[]; name: string }
   | { type: 'import'; text: string }
+  | { type: 'set-onboarded' }
+  | { type: 'set-scope'; whole: boolean }
   | { type: 'refresh' };
 
 export type MainToUi =
-  | { type: 'strings'; items: StringItem[] }
-  | { type: 'components'; components: ChitraComponent[] };
+  | {
+      type: 'strings';
+      items: StringItem[];
+      /** Whether this file has seen (and dismissed) the first-run card. */
+      onboarded: boolean;
+      /** True when the list is scoped to the current selection, not the whole file. */
+      scoped: boolean;
+    }
+  | { type: 'components'; components: ChitraComponent[] }
+  | { type: 'toast'; text: string; tone?: 'info' | 'success' };
