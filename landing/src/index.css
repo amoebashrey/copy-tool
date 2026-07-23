@@ -1,0 +1,288 @@
+@import 'tailwindcss';
+
+/* ————————————————————————————————————————————————————————————————
+   Chitra / चित्र — tokens from brand/chitra.md
+   Paper + ink carry ~95% of every surface. Jewels are semantic:
+   emerald = synced · saffron = drifted/WIP · indigo = review ·
+   gold = active token · ruby = rare, destructive.
+   ———————————————————————————————————————————————————————————————— */
+
+:root {
+  --paper: #f7f2e8;
+  --paper-raised: #fdfaf3;
+  --paper-sunk: #efe7d7;
+  --ink: #201f1a;
+  --ink-soft: #565248;
+  --ink-faint: #857f70;
+  --line: #d9d0bc;
+
+  --emerald: #0e6b4a;
+  --saffron: #e08a00;
+  --saffron-ink: #8f5600; /* text-safe saffron on light paper */
+  --indigo: #3b3b98;
+  --gold: #b8860b;
+  --gold-ink: #7d5c09; /* text-safe gold on light paper */
+  --ruby: #9b1b30;
+
+  --emerald-wash: #0e6b4a14;
+  --saffron-wash: #e08a001f;
+  --indigo-wash: #3b3b9814;
+  --gold-wash: #b8860b1c;
+
+  --stamp-shadow: 0 1px 2px #201f1a14, 0 12px 32px -12px #201f1a2e;
+  --grain-opacity: 0.5;
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --paper: #1a1915;
+  --paper-raised: #232119;
+  --paper-sunk: #14130f;
+  --ink: #f7f2e8;
+  --ink-soft: #bdb6a5;
+  --ink-faint: #8d887a;
+  --line: #3a372c;
+
+  --emerald: #2fa47c;
+  --saffron: #f0a62e;
+  --saffron-ink: #f0a62e;
+  --indigo: #8b8be0;
+  --gold: #d4a93c;
+  --gold-ink: #d4a93c;
+  --ruby: #d45a6e;
+
+  --emerald-wash: #2fa47c1f;
+  --saffron-wash: #f0a62e21;
+  --indigo-wash: #8b8be01f;
+  --gold-wash: #d4a93c24;
+
+  --stamp-shadow: 0 1px 2px #00000059, 0 14px 36px -12px #00000073;
+  --grain-opacity: 0.35;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-raised: var(--paper-raised);
+  --color-paper-sunk: var(--paper-sunk);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+  --color-line: var(--line);
+  --color-emerald: var(--emerald);
+  --color-saffron: var(--saffron);
+  --color-saffron-ink: var(--saffron-ink);
+  --color-indigo: var(--indigo);
+  --color-gold: var(--gold);
+  --color-gold-ink: var(--gold-ink);
+  --color-ruby: var(--ruby);
+
+  --font-display: 'Instrument Serif', 'Iowan Old Style', Georgia, serif;
+  --font-sans: 'Geist', 'Helvetica Neue', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', 'SFMono-Regular', Menlo, monospace;
+  --font-dev: 'Tiro Devanagari Hindi', 'Kohinoor Devanagari', serif;
+}
+
+/* ———— ground ———— */
+
+html {
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+/* paper grain — the page is a material, not a viewport */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.35 0 0 0 0 0.32 0 0 0 0 0.24 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+
+::selection {
+  background: var(--gold-wash);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold-ink);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* ———— type helpers ———— */
+
+.font-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+}
+.font-dev {
+  font-family: var(--font-dev);
+  font-weight: 400;
+}
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.05em;
+  text-transform: lowercase;
+  color: var(--ink-faint);
+}
+
+/* ———— the postage-stamp frame (signature card treatment) ————
+   Semicircular perforation notches punched along every edge via a
+   five-layer CSS mask: an inset interior rect + four edge strips of
+   repeating radial holes. */
+
+.stamp {
+  --hr: 4.5px; /* notch radius */
+  --hgap: 15px; /* notch spacing */
+  position: relative;
+  background: var(--paper-raised);
+  -webkit-mask:
+    linear-gradient(#000 0 0) no-repeat var(--hr) var(--hr) / calc(100% - var(--hr) * 2)
+      calc(100% - var(--hr) * 2),
+    radial-gradient(circle var(--hr) at 50% 0, #0000 98%, #000) repeat-x 0 0 / var(--hgap) var(--hr),
+    radial-gradient(circle var(--hr) at 50% 100%, #0000 98%, #000) repeat-x 0 100% / var(--hgap)
+      var(--hr),
+    radial-gradient(circle var(--hr) at 0 50%, #0000 98%, #000) repeat-y 0 0 / var(--hr) var(--hgap),
+    radial-gradient(circle var(--hr) at 100% 50%, #0000 98%, #000) repeat-y 100% 0 / var(--hr)
+      var(--hgap);
+  mask:
+    linear-gradient(#000 0 0) no-repeat var(--hr) var(--hr) / calc(100% - var(--hr) * 2)
+      calc(100% - var(--hr) * 2),
+    radial-gradient(circle var(--hr) at 50% 0, #0000 98%, #000) repeat-x 0 0 / var(--hgap) var(--hr),
+    radial-gradient(circle var(--hr) at 50% 100%, #0000 98%, #000) repeat-x 0 100% / var(--hgap)
+      var(--hr),
+    radial-gradient(circle var(--hr) at 0 50%, #0000 98%, #000) repeat-y 0 0 / var(--hr) var(--hgap),
+    radial-gradient(circle var(--hr) at 100% 50%, #0000 98%, #000) repeat-y 100% 0 / var(--hr)
+      var(--hgap);
+}
+
+/* inner frame line, like the ruled border inside a real stamp */
+.stamp::after {
+  content: '';
+  position: absolute;
+  inset: 13px;
+  border: 1px solid var(--line);
+  pointer-events: none;
+}
+
+.stamp-well {
+  /* drop shadow must live on a wrapper — the mask clips the stamp itself */
+  filter: drop-shadow(0 1px 2px rgb(32 31 26 / 0.1)) drop-shadow(0 14px 28px rgb(32 31 26 / 0.13));
+}
+[data-theme='dark'] .stamp-well {
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.4)) drop-shadow(0 16px 32px rgb(0 0 0 / 0.45));
+}
+
+/* ———— manuscript rule — section delimiter, like a ledger ———— */
+
+.manuscript-rule {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--line);
+}
+.manuscript-rule::before,
+.manuscript-rule::after {
+  content: '';
+  height: 1px;
+  flex: 1;
+  background: currentColor;
+}
+
+/* ———— buttons ———— */
+
+.cta-stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  padding: 12px 22px;
+  border: 1px dashed color-mix(in srgb, var(--paper) 45%, transparent);
+  outline-offset: -5px;
+  box-shadow: 3px 3px 0 var(--gold);
+  transition:
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+.cta-stamp:hover {
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0 var(--gold);
+}
+.cta-stamp:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0 0 0 var(--gold);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cta-stamp,
+  .cta-stamp:hover,
+  .cta-stamp:active {
+    transition: none;
+    transform: none;
+  }
+}
+
+.cta-quiet {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--ink-soft);
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 2px;
+  transition: color 140ms ease, border-color 140ms ease;
+}
+.cta-quiet:hover {
+  color: var(--ink);
+  border-color: var(--gold);
+}
+
+/* ———— skip link ———— */
+
+.skip-link {
+  position: absolute;
+  left: 16px;
+  top: -48px;
+  z-index: 100;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 10px 16px;
+  transition: top 120ms ease;
+}
+.skip-link:focus-visible {
+  top: 12px;
+}
+
+/* ———— reduced motion: kill every non-essential animation ———— */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
