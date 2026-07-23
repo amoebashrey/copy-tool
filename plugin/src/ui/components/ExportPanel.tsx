@@ -58,11 +58,12 @@ export function ExportPanel({ items, components }: Props) {
         <h3 class="frame-name">Import</h3>
         <p class="sub">
           Paste rows of <strong>id, text</strong> (comma, tab, or semicolon delimited) to
-          write copy back onto the canvas. Ids match the export above.
+          write copy back onto the canvas. Ids match the export above — stable keys
+          first, then node ids.
         </p>
         <textarea
           rows={4}
-          placeholder={'1:23,Save changes\n1:24,Cancel'}
+          placeholder={'checkout.cta_primary,Save changes\n1:24,Cancel'}
           value={pasted}
           onInput={(e) => setPasted((e.target as HTMLTextAreaElement).value)}
         />

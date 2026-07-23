@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'preact/hooks';
 import type { ChitraComponent, MainToUi, Status, StringItem, UiToMain } from '../lib/types';
-import { filterStrings, groupByPage } from '../lib/strings';
+import { filterStrings, groupByPage, looseStrings } from '../lib/strings';
 import { propagationTargets } from '../lib/components';
 import { Toolbar } from './components/Toolbar';
 import { StringRow } from './components/StringRow';
@@ -24,6 +24,7 @@ export function App() {
   const [components, setComponents] = useState<ChitraComponent[]>([]);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<Status | 'all'>('all');
+  const [looseOnly, setLooseOnly] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -36,8 +37,9 @@ export function App() {
     send({ type: 'refresh' });
   }, []);
 
-  const visible = filterStrings(items, { search, status });
+  const visible = filterStrings(items, { search, status, looseOnly });
   const pages = groupByPage(visible);
+  const looseCount = looseStrings(items).length;
 
   return (
     <div class="app">
@@ -55,7 +57,15 @@ export function App() {
 
       {tab === 'strings' && (
         <>
-          <Toolbar search={search} onSearch={setSearch} status={status} onStatus={setStatus} />
+          <Toolbar
+            search={search}
+            onSearch={setSearch}
+            status={status}
+            onStatus={setStatus}
+            looseOnly={looseOnly}
+            onLooseOnly={setLooseOnly}
+            looseCount={looseCount}
+          />
           <div class="scroll">
             {pages.map((p) => (
               <section key={p.page}>
@@ -67,6 +77,7 @@ export function App() {
                       <StringRow
                         key={item.id}
                         item={item}
+                        allItems={items}
                         components={components}
                         expanded={expandedId === item.id}
                         onToggle={() => setExpandedId(expandedId === item.id ? null : item.id)}

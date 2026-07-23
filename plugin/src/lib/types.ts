@@ -12,6 +12,8 @@ export interface StringItem {
   pageName: string;
   status: Status;
   componentId: string | null;
+  /** Stable, human-readable handoff key (pluginData `chitra.key`), if set. */
+  key: string | null;
 }
 
 /** A reusable copy component (registry lives in figma.root pluginData). */
@@ -23,6 +25,7 @@ export interface ChitraComponent {
 
 /** One row of the developer handoff export. */
 export interface ExportRow {
+  /** The item's stable key when set, else its node id. */
   id: string;
   frame: string;
   text: string;
@@ -39,6 +42,7 @@ export interface ImportRow {
 export type UiToMain =
   | { type: 'edit-text'; id: string; text: string }
   | { type: 'set-status'; id: string; status: Status }
+  | { type: 'set-key'; id: string; key: string }
   | { type: 'create-component'; nodeId: string; name: string }
   | { type: 'link-component'; nodeId: string; componentId: string }
   | { type: 'edit-component'; componentId: string; text: string }

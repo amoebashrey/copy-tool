@@ -6,6 +6,7 @@ import { matchImportRows, parseImport } from './lib/export';
 
 const PD_STATUS = 'chitra.status';
 const PD_COMPONENT = 'chitra.componentId';
+const PD_KEY = 'chitra.key';
 const PD_REGISTRY = 'chitra.components';
 const PD_COUNTER = 'chitra.counter';
 
@@ -65,6 +66,7 @@ function toItem(node: TextNode): StringItem {
     pageName: pageName(node),
     status: toStatus(node.getPluginData(PD_STATUS)),
     componentId: node.getPluginData(PD_COMPONENT) || null,
+    key: node.getPluginData(PD_KEY) || null,
   };
 }
 
@@ -126,6 +128,11 @@ figma.ui.onmessage = async (msg: UiToMain) => {
       textNode(msg.id)?.setPluginData(PD_STATUS, msg.status);
       break;
     }
+    case 'set-key': {
+      // The UI validates uniqueness/format; an empty key clears the pluginData.
+      textNode(msg.id)?.setPluginData(PD_KEY, msg.key.trim());
+      break;
+    }
     case 'create-component': {
       const node = textNode(msg.nodeId);
       if (node) {
@@ -157,9 +164,13 @@ figma.ui.onmessage = async (msg: UiToMain) => {
     case 'import': {
       const rows = parseImport(msg.text);
       const nodes = new Map(allTextNodes().map((n) => [n.id, n] as const));
-      const { matched, missingIds } = matchImportRows(rows, nodes.keys());
+      const targets = [...nodes.values()].map((n) => ({
+        id: n.id,
+        key: n.getPluginData(PD_KEY) || null,
+      }));
+      const { matched, missingIds } = matchImportRows(rows, targets);
       for (const row of matched) {
-        const node = nodes.get(row.id);
+        const node = nodes.get(row.nodeId);
         if (node) await setCharacters(node, row.text);
       }
       const skipped = missingIds.length > 0 ? `, ${missingIds.length} not found` : '';

@@ -54,6 +54,7 @@ const item = (id: string, componentId: string | null, pageName = 'Page 1'): Stri
   pageName,
   status: 'none',
   componentId,
+  key: null,
 });
 
 test('propagationTargets: returns ids of items linked to the component', () => {

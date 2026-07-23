@@ -4,7 +4,7 @@ import type { ChitraComponent, ExportRow, ImportRow, StringItem } from './types'
 export function toExportJson(items: StringItem[], components: ChitraComponent[]): ExportRow[] {
   const names = new Map(components.map((c) => [c.id, c.name]));
   return items.map((i) => ({
-    id: i.id,
+    id: i.key || i.id, // stable human key when set, node id otherwise
     frame: i.frameName,
     text: i.characters,
     status: i.status,
@@ -49,23 +49,41 @@ export function parseImport(text: string): ImportRow[] {
   return rows;
 }
 
+/** The id + key of a document node an import row could target. */
+export type ImportTarget = Pick<StringItem, 'id' | 'key'>;
+
+/** An import row resolved to the node it should apply to. */
+export interface MatchedImportRow {
+  nodeId: string;
+  text: string;
+}
+
 export interface ImportMatch {
-  matched: ImportRow[];
+  matched: MatchedImportRow[];
   missingIds: string[];
 }
 
 /**
- * Split parsed import rows into those whose id exists in the document
- * (the same `node.id` key the export uses) and those that don't.
+ * Resolve parsed import rows against the document: a row's id matches a
+ * node's stable key first (what the export emits when a key is set), then
+ * falls back to the raw node id. When one node's key collides with another
+ * node's id, the key wins — keys are the intentional, human-assigned handle.
  * Row order is preserved; a duplicated id stays duplicated so the last
  * row wins when rows are applied in order.
  */
-export function matchImportRows(rows: ImportRow[], existingIds: Iterable<string>): ImportMatch {
-  const ids = new Set(existingIds);
-  const matched: ImportRow[] = [];
+export function matchImportRows(rows: ImportRow[], targets: Iterable<ImportTarget>): ImportMatch {
+  const idByKey = new Map<string, string>();
+  const ids = new Set<string>();
+  for (const t of targets) {
+    ids.add(t.id);
+    // Keys are validated unique in the UI; if stale data disagrees, first wins.
+    if (t.key && !idByKey.has(t.key)) idByKey.set(t.key, t.id);
+  }
+  const matched: MatchedImportRow[] = [];
   const missingIds: string[] = [];
   for (const row of rows) {
-    if (ids.has(row.id)) matched.push(row);
+    const nodeId = idByKey.get(row.id) ?? (ids.has(row.id) ? row.id : undefined);
+    if (nodeId !== undefined) matched.push({ nodeId, text: row.text });
     else missingIds.push(row.id);
   }
   return { matched, missingIds };
