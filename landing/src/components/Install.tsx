@@ -3,13 +3,12 @@ import { Reveal } from './Reveal'
 const STEPS = [
   {
     no: '१',
-    title: 'Build it once',
+    title: 'Download & unzip',
     body: (
       <>
-        In the repo’s <code className="font-mono text-[12.5px]">plugin/</code> folder:
-        <span className="mt-2 block overflow-x-auto border border-line bg-ink px-3 py-2 font-mono text-[12px] text-paper">
-          npm install && npm run build
-        </span>
+        Grab the zip above and unzip it somewhere permanent.{' '}
+        <span className="text-ink">Don’t move the folder after importing</span> — Figma reads the
+        files by their location.
       </>
     ),
   },
@@ -26,8 +25,8 @@ const STEPS = [
         <span className="font-mono text-[12.5px]">
           Plugins → Development → Import plugin from manifest…
         </span>{' '}
-        and pick <span className="font-mono text-[12.5px]">plugin/manifest.json</span>. You do this
-        once.
+        and pick <span className="font-mono text-[12.5px]">manifest.json</span> from the folder. You
+        do this once.
       </>
     ),
   },
@@ -47,7 +46,7 @@ export function Install() {
   return (
     <section id="start" className="border-t border-line bg-paper-sunk">
       <div className="mx-auto max-w-6xl px-5 py-20 md:px-8 md:py-28">
-        <Reveal className="mb-12 max-w-xl">
+        <Reveal className="mb-10 max-w-xl">
           <p className="eyebrow mb-4">
             {'// '}
             <span className="font-dev" aria-hidden="true">
@@ -56,12 +55,37 @@ export function Install() {
             · install
           </p>
           <h2 className="font-display text-4xl leading-tight sm:text-5xl">
-            Runs as a <em className="italic">development</em> plugin.
+            Download it. <em className="italic">Import</em> it. Done.
           </h2>
           <p className="mt-5 text-[15px] leading-relaxed text-ink-soft">
-            No marketplace listing yet. Four steps, fully offline — the plugin requests no network
+            No marketplace listing, no build step, no account. Chitra runs as a{' '}
+            <em className="italic">development</em> plugin — fully offline, requesting no network
             access at all.
           </p>
+        </Reveal>
+
+        {/* download card — the one thing to click */}
+        <Reveal delay={0.05} className="mb-14">
+          <div className="stamp-well max-w-xl">
+            <div className="stamp p-6 sm:p-7">
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="eyebrow mb-1">the plugin · ready to import</p>
+                  <p className="font-display text-2xl leading-snug">chitra-figma-plugin.zip</p>
+                  <p className="mt-1 font-mono text-[12px] text-ink-faint">
+                    prebuilt · offline · install notes inside
+                  </p>
+                </div>
+                <a
+                  href="/chitra-figma-plugin.zip"
+                  download
+                  className="cta-stamp shrink-0 self-start sm:self-auto"
+                >
+                  <span aria-hidden="true">↓</span> Download plugin
+                </a>
+              </div>
+            </div>
+          </div>
         </Reveal>
 
         <ol className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -84,6 +108,16 @@ export function Install() {
           <p className="eyebrow mt-12 leading-relaxed">
             select a frame → chitra lists every string → assign tokens, set statuses → export{' '}
             <span className="text-emerald">copy.json</span> for the build
+          </p>
+        </Reveal>
+
+        {/* developer aside — building from source stays possible, just not the headline */}
+        <Reveal delay={0.25}>
+          <p className="mt-6 text-[13px] leading-relaxed text-ink-faint">
+            Rather build from source? Clone the repo and run{' '}
+            <span className="font-mono text-[12px] text-ink-soft">npm install &amp;&amp; npm run build</span>{' '}
+            in <span className="font-mono text-[12px] text-ink-soft">plugin/</span>, then import{' '}
+            <span className="font-mono text-[12px] text-ink-soft">plugin/manifest.json</span>.
           </p>
         </Reveal>
       </div>
