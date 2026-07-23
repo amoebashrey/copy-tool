@@ -3,6 +3,7 @@ import { DiyaIcon, MoonIcon } from './Ornaments'
 
 const links = [
   { href: '#work', label: 'what it does' },
+  { href: '#how', label: 'how it works' },
   { href: '#name', label: 'the name' },
   { href: '#ledger', label: 'roadmap' },
   { href: '#start', label: 'install' },
@@ -26,7 +27,8 @@ export function Nav() {
           </span>
         </a>
 
-        <nav aria-label="Sections" className="hidden items-center gap-6 md:flex">
+        {/* five links no longer fit beside the lockup at md — show from lg up */}
+        <nav aria-label="Sections" className="hidden items-center gap-6 lg:flex">
           {links.map((l) => (
             <a key={l.href} href={l.href} className="cta-quiet border-b-transparent">
               {l.label}

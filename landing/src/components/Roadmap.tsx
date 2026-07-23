@@ -26,7 +26,7 @@ export function Roadmap() {
           <p className="eyebrow mb-4">
             {'// '}
             <span className="font-dev" aria-hidden="true">
-              ०३
+              ०४
             </span>{' '}
             · roadmap
           </p>

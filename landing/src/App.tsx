@@ -2,6 +2,7 @@ import { Nav } from './components/Nav'
 import { Hero } from './components/Hero'
 import { TokenBand } from './components/TokenBand'
 import { Features } from './components/Features'
+import { HowItWorks } from './components/HowItWorks'
 import { Naming } from './components/Naming'
 import { Roadmap } from './components/Roadmap'
 import { Install } from './components/Install'
@@ -19,6 +20,7 @@ export default function App() {
         <Hero />
         <TokenBand />
         <Features />
+        <HowItWorks />
         <Naming />
         <Roadmap />
         <Install />

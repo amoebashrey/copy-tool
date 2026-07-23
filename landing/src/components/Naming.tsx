@@ -29,7 +29,7 @@ export function Naming() {
             <p className="eyebrow mb-4">
               {'// '}
               <span className="font-dev" aria-hidden="true">
-                ०२
+                ०३
               </span>{' '}
               · the name
             </p>

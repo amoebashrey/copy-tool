@@ -50,7 +50,7 @@ export function Install() {
           <p className="eyebrow mb-4">
             {'// '}
             <span className="font-dev" aria-hidden="true">
-              ०४
+              ०५
             </span>{' '}
             · install
           </p>
